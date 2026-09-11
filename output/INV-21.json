@@ -31,7 +31,7 @@
       "excise_duties": "",
       "taxes": [
         {
-          "tax_type": "VAT",
+          "tax_type": "IVA",
           "tax_name": "IVA",
           "tax_rate": "23",
           "tax_amount": "100.19",
@@ -40,14 +40,14 @@
       ],
       "line_items": [
         {
-          "description": "SICAL SUPER BAR Cafe Grao 6xkg N1PT",
+          "description": "SICAL SUPER BAR Cafe Grao 6x1kg N1PT",
           "item_type": "GOODS",
           "uom": "UND",
-          "quantity": "24000",
+          "quantity": "24",
           "unit_price": "34.69",
-          "total": "830.95",
+          "total": "832.56",
           "discount": "",
-          "discount_percentage": "51",
+          "discount_percentage": "",
           "tax_rate": "",
           "tax_amount": "",
           "taxes": []
@@ -56,7 +56,7 @@
           "description": "Chocolate Quente 12(25x20g)N1",
           "item_type": "GOODS",
           "uom": "UND",
-          "quantity": "1000",
+          "quantity": "1",
           "unit_price": "10.01",
           "total": "10.01",
           "discount": "",
@@ -66,10 +66,10 @@
           "taxes": []
         },
         {
-          "description": "NESCAFE Açucar Std 1.2x8kg PT",
+          "description": "NESCAFE Açucar Std 1x2.8kg PT",
           "item_type": "GOODS",
           "uom": "UND",
-          "quantity": "1000",
+          "quantity": "1",
           "unit_price": "8.3",
           "total": "8.3",
           "discount": "",
@@ -82,7 +82,7 @@
           "description": "AHMAD Inf Mentha-Lim (20x1.5g)N1PT",
           "item_type": "GOODS",
           "uom": "UND",
-          "quantity": "3000",
+          "quantity": "3",
           "unit_price": "2.94",
           "total": "8.82",
           "discount": "",
@@ -95,7 +95,7 @@
           "description": "AHMAD Inf Camomila (60x1.5g)N1PT",
           "item_type": "GOODS",
           "uom": "UND",
-          "quantity": "3000",
+          "quantity": "3",
           "unit_price": "2.94",
           "total": "8.82",
           "discount": "",

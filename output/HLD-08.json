@@ -35,7 +35,7 @@
           "tax_name": "VAT",
           "tax_rate": "15",
           "tax_amount": "19427.15",
-          "tax_type_code": "ZAF_150_VAT"
+          "tax_type_code": ""
         }
       ],
       "line_items": [
@@ -47,7 +47,7 @@
           "unit_price": "276.74",
           "total": "129514.32",
           "discount": "",
-          "discount_percentage": "15",
+          "discount_percentage": "",
           "tax_rate": "",
           "tax_amount": "",
           "taxes": []

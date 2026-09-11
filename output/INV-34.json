@@ -3,7 +3,7 @@
   "payables": [
     {
       "invoice_number": "1220-127612",
-      "invoice_date": "2015-06-20",
+      "invoice_date": "2006-06-2015",
       "due_date": "2015-06-27",
       "invoice_type": "INVOICE",
       "currency": "$",
@@ -35,7 +35,7 @@
           "tax_name": "GST",
           "tax_rate": "10",
           "tax_amount": "52",
-          "tax_type_code": "SG_090_GST"
+          "tax_type_code": ""
         }
       ],
       "line_items": [
@@ -43,8 +43,8 @@
           "description": "Workstation",
           "item_type": "SERVICE",
           "uom": "",
-          "quantity": "",
-          "unit_price": "",
+          "quantity": "1",
+          "unit_price": "520",
           "total": "520",
           "discount": "",
           "discount_percentage": "",

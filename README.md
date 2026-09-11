@@ -69,6 +69,8 @@ DESIGN.md                  design writeup
 
 ## Known gaps in the current output
 
-`output/*.json` here was produced under a hard budget cut partway through — see the "what I'd do
-next" note at the end of `DESIGN.md` for exactly which documents are still imperfect and why, rather
-than presenting the run as cleaner than it is.
+Of 42 documents: 34 payables extracted, 14 correctly declined as non-payables, **30 of the 34
+payables foot exactly** against `erp.py`. The remaining 4 (two off by a single cent of rounding, two
+with a real residual gap) are named and explained — including exactly what I did and didn't verify
+by hand versus through the automated pipeline — in the "Current state" section at the end of
+`DESIGN.md`, rather than presenting the run as cleaner than it is.

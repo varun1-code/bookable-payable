@@ -22,30 +22,22 @@
       "po_number": "",
       "po_id": "",
       "gross_total": "37767.32",
-      "subtotal": "31889.09",
-      "total_tax_amount": "5878.23",
+      "subtotal": "37767.32",
+      "total_tax_amount": "0",
       "discount_amount": "",
       "freight_charges": "",
       "insurance_charges": "",
       "extra_charges": "",
       "excise_duties": "",
-      "taxes": [
-        {
-          "tax_type": "VAT",
-          "tax_name": "KM alus VAT C.A",
-          "tax_rate": "0",
-          "tax_amount": "0",
-          "tax_type_code": "DE_000_RC"
-        }
-      ],
+      "taxes": [],
       "line_items": [
         {
           "description": "Import duties",
-          "item_type": "SERVICE",
+          "item_type": "TAX",
           "uom": "",
-          "quantity": "",
-          "unit_price": "",
-          "total": "",
+          "quantity": "1",
+          "unit_price": "31889.09",
+          "total": "31889.09",
           "discount": "",
           "discount_percentage": "",
           "tax_rate": "",
@@ -54,11 +46,11 @@
         },
         {
           "description": "Customs VAT",
-          "item_type": "SERVICE",
+          "item_type": "TAX",
           "uom": "",
-          "quantity": "",
-          "unit_price": "",
-          "total": "",
+          "quantity": "1",
+          "unit_price": "5878.23",
+          "total": "5878.23",
           "discount": "",
           "discount_percentage": "",
           "tax_rate": "",
@@ -71,7 +63,7 @@
   "declined": [
     {
       "doc_type": "customs declaration",
-      "reason": "This is a customs declaration document, not an invoice"
+      "reason": "This is a customs declaration document, not a payable"
     }
   ]
 }

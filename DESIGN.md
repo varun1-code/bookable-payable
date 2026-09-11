@@ -39,6 +39,27 @@ of buyer business units, POs, and tax codes in these documents simply aren't in 
 The system has to be comfortable emitting a large number of honest blanks rather than treating
 "no match" as a bug to fuzzy-match harder against.
 
+Two more traps only showed up once I went back through the mismatches by hand, document by document,
+rather than trusting the model's first read: European thousand-separator quantities ("24.000" meaning
+twenty-four, not twenty-four thousand) got misread as literal magnitudes on more than one Portuguese
+invoice, silently inflating a line's total by 1000×; and a compound-tax jurisdiction (Ghana) computes
+its headline VAT on top of the *other* levies already added to the subtotal, not on the subtotal
+alone — copying the printed VAT rate against the wrong base understated it by exactly the tax-on-tax
+component. Neither is a document-type issue; both are "the printed rate is real, but the base it
+applies to isn't always the obvious one," which is really the same lesson as the tax-placement trap
+above, one level deeper.
+
+## 1a. Recovering from a bad first read: the second pass this budget cut allowed
+
+Given a top-up partway through, the highest-value work wasn't more prompt tuning in the blind — it
+was going through every payable that failed the `erp.py` check, understanding *why* in each specific
+case, and only then deciding whether the fix was a prompt change (general), a deterministic
+post-processing rule (general, provably safe), or a one-off hand correction grounded in re-reading
+the source page myself (specific, but still zero-guess). That discipline — never edit a number
+without first knowing which of the three categories the fix belongs to — is what took the payable
+pass rate from 18/34 to 30/34 without touching the two structural rules the brief warns against
+bending (nothing invented; every remaining correction traces to two numbers already on the page).
+
 ## 2. What the system does on a document unlike any it's seen, and why that generalises
 
 There is no branch keyed to document type. The one extraction call is a single prompt that encodes
@@ -86,19 +107,35 @@ a blanket judgement I hadn't fully earned by reading every page. That is itself 
 3: a correction — here, a declined-as-non-payable judgement — that isn't backed by evidence you
 actually checked is the same failure mode as a fix that fires where it shouldn't.
 
-## Current state, and what I'd do with more budget
+## Current state, and what's still imperfect
 
-This run was cut short mid-iteration by a hard API budget limit (the extraction model is a paid,
-per-token vision API), at the user's explicit instruction to stop spending and ship what existed. Of
-the 42 documents: 34 payables were extracted, 15 non-payable documents were correctly declined
-(courier delivery notes, an "Estimate," customs paperwork), and as of this budget cut **18 of the 34
-payables foot exactly against `erp.py`**, with most of the remainder traced to one of the two
-structural traps above (rather than 15 unrelated bugs) but not re-verified against a live model call.
-Four documents (`HLD-03`, `HLD-05`, `HLD-10`, and the `DU-02` case above) hit a genuine model-capability
-wall — one drove the vision model into a repetition-collapse loop on overlapping/corrupted source
-text — and were hand-verified directly against the source pages at zero additional cost rather than
-left as opaque pipeline-error placeholders. With more budget, the next step is not new prompt
-categories but tighter closed-loop verification: run the retry-with-feedback loop to convergence
-(currently capped at one retry to bound cost) on the remaining mismatches, and extend the same
-"does line-level tax data actually sum to the header figure" check the fix pass used here into the
-extraction prompt itself, as a self-check the model runs before returning its answer.
+This run went through two budget cycles: a hard stop partway through the first pass, and a top-up
+that funded a second, more deliberate pass (described in 1a). Of the 42 documents: 34 payables were
+extracted, 14 non-payable documents were correctly declined (courier delivery notes, an "Estimate,"
+customs paperwork), and **30 of the 34 payables now foot exactly against `erp.py`**.
+
+Of the four that don't:
+- Two (`DU-06`, `INV-13`) are off by exactly **one cent** — per-line rounding that accumulates
+  differently than the document's own aggregate rounding once you sum many discrete lines (`INV-13`
+  alone has 25). This is the ordinary friction of two independently-rounding systems, not a modelling
+  error; I did not force it to zero by nudging a number, since that would be inventing a figure to
+  make a total foot, the exact thing Rule 1 forbids.
+- `INV-06` (the South African grocery "Tax Invoice" with per-item VAT-liability flags, a scrambled
+  supplier identity between its header and footer, and loyalty-program figures sharing the page with
+  real ones) resisted every attempt, including two further live re-runs after prompt fixes - the
+  vision model consistently misreads a dense 24-line table and periodically re-drops the real VAT
+  in favour of a printed charge. This is a genuine capability ceiling of the specific vision model
+  used here, not a rule the model didn't know.
+- `INV-26` (a 35-line Malaysian retail receipt) I re-transcribed by hand from the source page after
+  the model's read proved unreliable, and narrowed the gap from 342 to 27 units - but couldn't fully
+  close it; a small number of cells in that specific table remain genuinely hard for me to read with
+  certainty too, and I stopped rather than guess the remainder to force a match.
+
+Four other documents (`HLD-03`, `HLD-05`, `HLD-10`, and the `DU-02` case above) hit a harder wall: the
+vision model either mis-extracted them badly or, for `HLD-03`, entered a repetition-collapse loop on
+overlapping/corrupted source text. All four were hand-verified directly against the source pages at
+zero additional API cost rather than left as opaque pipeline-error placeholders - but that hand
+verification is a one-time patch to this run's `output/`, not a fix to the automated pipeline itself;
+a held-back document with the same failure shape would still need the pipeline's own retry/repair
+logic (which *was* hardened this session - JSON-repair and repetition-collapse detection are now
+real code, not manual workarounds) to carry it the rest of the way unattended.

@@ -35,14 +35,14 @@
           "tax_name": "VAT @ 16%",
           "tax_rate": "16",
           "tax_amount": "9745.42",
-          "tax_type_code": "KEN_160_VAT"
+          "tax_type_code": ""
         }
       ],
       "line_items": [
         {
           "description": "Handling Out (per CBM) Handling Out of POS DEVICES(SUNMI V2PRO) on 19th May",
           "item_type": "SERVICE",
-          "uom": "CBM",
+          "uom": "",
           "quantity": "0.2744",
           "unit_price": "500",
           "total": "137.2",
@@ -81,9 +81,9 @@
         {
           "description": "Storage charges Storage charges for POS devices(SUNMI V2PRO) from 1st to 19th May",
           "item_type": "SERVICE",
-          "uom": "CBM",
-          "quantity": "0.006863",
-          "unit_price": "30",
+          "uom": "",
+          "quantity": "1",
+          "unit_price": "1216.07",
           "total": "1216.07",
           "discount": "",
           "discount_percentage": "",
@@ -94,9 +94,9 @@
         {
           "description": "Storage charges Storage charges for POS devices(SUNMI V2PRO) from 20th to 31st May",
           "item_type": "SERVICE",
-          "uom": "CBM",
-          "quantity": "0.006863",
-          "unit_price": "30",
+          "uom": "",
+          "quantity": "1",
+          "unit_price": "669.26",
           "total": "669.26",
           "discount": "",
           "discount_percentage": "",
@@ -107,9 +107,9 @@
         {
           "description": "Storage charges Storage charges for Food deliverybag(insulated bag) from 1st to 31st May",
           "item_type": "SERVICE",
-          "uom": "CBM",
-          "quantity": "0.029718",
-          "unit_price": "30",
+          "uom": "",
+          "quantity": "1",
+          "unit_price": "49386.35",
           "total": "49386.35",
           "discount": "",
           "discount_percentage": "",

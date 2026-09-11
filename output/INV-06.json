@@ -11,7 +11,7 @@
         "name": "Northwind Services ZA (Pty) Ltd",
         "supplier_id": "",
         "address": "Unit 7 Block B, M5 Office Park, Unit 7, Block B, Eastman, Maitland, Cape Town 7405",
-        "vat_id": "4466399440"
+        "vat_id": "4464639440"
       },
       "buyer": {
         "company_code": "",
@@ -35,7 +35,7 @@
           "tax_name": "VAT",
           "tax_rate": "15",
           "tax_amount": "206.96",
-          "tax_type_code": "ZAF_150_VAT"
+          "tax_type_code": ""
         }
       ],
       "line_items": [
@@ -304,8 +304,8 @@
           "item_type": "GOODS",
           "uom": "EA",
           "quantity": "2",
-          "unit_price": "69.99",
-          "total": "139.98",
+          "unit_price": "39.99",
+          "total": "79.98",
           "discount": "",
           "discount_percentage": "",
           "tax_rate": "",
@@ -317,8 +317,8 @@
           "item_type": "GOODS",
           "uom": "EA",
           "quantity": "1",
-          "unit_price": "69.99",
-          "total": "69.99",
+          "unit_price": "39.99",
+          "total": "39.99",
           "discount": "",
           "discount_percentage": "",
           "tax_rate": "",

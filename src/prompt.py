@@ -114,6 +114,18 @@ FIELD NOTES:
   non-empty per-line tax fields must never coexist on the same payable. Only give lines their own
   taxes[] when the document itself prints a rate/amount separately per line (and in that case, leave
   the header taxes[] empty instead).
+- A CHARGE is not a TAX - keep them in separate fields even when a table lists them in the same
+  column or row. A fuel surcharge, handling fee, service/agency/management fee, delivery/shipping
+  cost, or similar is a CHARGE: it goes in freight_charges/insurance_charges/extra_charges (or its
+  own line item), never in taxes[]. It does not have a government tax authority behind it, is not a
+  percentage of a taxable base in the VAT/GST/sales-tax sense, and the ERP must NOT try to derive it
+  from a "rate" - putting it in taxes[] risks exactly that. Conversely, when a document shows both
+  (a) a charge like this AND (b) a separate genuine tax line (VAT/GST/IVA/KM/sales tax, usually
+  computed as a % of the pre-tax total including that charge) - you must capture BOTH: the charge as
+  a charge, and the tax as a tax. Dropping the real tax because you used its slot for the charge is a
+  common and costly mistake - before finishing, check whether the document shows a tax figure (any
+  VAT/GST/sales-tax box, often with its own % rate printed) that you have not yet put anywhere in
+  taxes[].
 - Any header-level fee/charge that is not a tax (a service fee, agency/management fee, handling fee,
   surcharge) still changes what's owed and must not be dropped: put it in extra_charges (or as its own
   line item if the document itemises it that way) even though the schema's named charge fields
@@ -127,6 +139,11 @@ FIELD NOTES:
   on every line. Where you cannot cleanly attribute tax to a subset of lines (e.g. only some items are
   tax-liable and no per-item rate is printed), it is fine to apply the same scaling to all lines rather
   than guessing which specific items were exempt.
+- Never put a placeholder or sentinel value in tax_rate/tax_amount (e.g. "100", "0", "N/A" typed into
+  a numeric field) to mean "not applicable" or "no tax here" - leave both fields genuinely "" instead.
+  A stray tax_rate is not inert: the ERP treats any non-empty tax_rate as a real rate to apply, so a
+  meaningless "100" silently doubles that line's total. Only put a rate/amount there for a real,
+  printed tax.
 - Read dense tables cell-by-cell. A column showing two numbers together (e.g. "ordered/delivered"
   as "1/1") is not a single two-digit quantity - identify which of the two numbers is the billable
   quantity (usually the delivered/shipped one) and use only that one digit-for-digit.

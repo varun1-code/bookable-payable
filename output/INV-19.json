@@ -35,28 +35,28 @@
           "tax_name": "NHIL (2.5%)",
           "tax_rate": "2.5",
           "tax_amount": "165",
-          "tax_type_code": "TAX028"
+          "tax_type_code": ""
         },
         {
-          "tax_type": "OTHER",
+          "tax_type": "GETFund Levy",
           "tax_name": "GETFund Levy (2.5%)",
           "tax_rate": "2.5",
           "tax_amount": "165",
-          "tax_type_code": "TAX028"
+          "tax_type_code": ""
         },
         {
-          "tax_type": "OTHER",
+          "tax_type": "COVID-19 Levy",
           "tax_name": "COVID-19 Levy (1%)",
           "tax_rate": "1",
           "tax_amount": "66",
-          "tax_type_code": "TAX030"
+          "tax_type_code": ""
         },
         {
           "tax_type": "VAT",
           "tax_name": "VAT (15%)",
           "tax_rate": "15",
-          "tax_amount": "996",
-          "tax_type_code": "ZAF_150_VAT"
+          "tax_amount": "1049.40",
+          "tax_type_code": ""
         }
       ],
       "line_items": [

@@ -25,17 +25,17 @@
       "subtotal": "538.6",
       "total_tax_amount": "117.72",
       "discount_amount": "48.09",
-      "freight_charges": "50",
+      "freight_charges": "",
       "insurance_charges": "",
       "extra_charges": "",
       "excise_duties": "",
       "taxes": [
         {
           "tax_type": "VAT",
-          "tax_name": "Kaibemaks",
+          "tax_name": "Kuibemaks",
           "tax_rate": "24",
           "tax_amount": "117.72",
-          "tax_type_code": "EST_240_VAT"
+          "tax_type_code": ""
         }
       ],
       "line_items": [
@@ -53,7 +53,7 @@
           "taxes": []
         },
         {
-          "description": "Meremind ADJ Starburst",
+          "description": "Meremin ADJ Starburst",
           "item_type": "GOODS",
           "uom": "24 tundi",
           "quantity": "1",
@@ -209,11 +209,11 @@
           "taxes": []
         },
         {
-          "description": "Linnasiseene transport",
-          "item_type": "FREIGHT",
+          "description": "Linnaasene transport",
+          "item_type": "GOODS",
           "uom": "",
           "quantity": "1",
-          "unit_price": "",
+          "unit_price": "50",
           "total": "50",
           "discount": "",
           "discount_percentage": "",
@@ -226,8 +226,8 @@
           "item_type": "GOODS",
           "uom": "",
           "quantity": "2",
-          "unit_price": "",
-          "total": "",
+          "unit_price": "17.85",
+          "total": "35.7",
           "discount": "",
           "discount_percentage": "",
           "tax_rate": "",
