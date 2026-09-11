@@ -1,0 +1,85 @@
+{
+  "file": "INV-25.pdf",
+  "payables": [
+    {
+      "invoice_number": "PT456472637",
+      "invoice_date": "2026-04-13",
+      "due_date": "2026-05-13",
+      "invoice_type": "INVOICE",
+      "currency": "EUR",
+      "supplier": {
+        "name": "Fairmont Services LDA",
+        "supplier_id": "",
+        "address": "High Street 34\n1000-137 LISBOA",
+        "vat_id": "PT001371375"
+      },
+      "buyer": {
+        "company_code": "",
+        "business_unit_code": "",
+        "location_code": ""
+      },
+      "payment_term_id": "",
+      "po_number": "",
+      "po_id": "",
+      "gross_total": "176",
+      "subtotal": "143.09",
+      "total_tax_amount": "32.91",
+      "discount_amount": "0",
+      "freight_charges": "0",
+      "insurance_charges": "0",
+      "extra_charges": "0",
+      "excise_duties": "0",
+      "taxes": [
+        {
+          "tax_type": "VAT",
+          "tax_name": "IVA",
+          "tax_rate": "23",
+          "tax_amount": "32.91",
+          "tax_type_code": "PT_230_IVA"
+        }
+      ],
+      "line_items": [
+        {
+          "description": "FOT/IMPRESSÃO A4 CORES 1 ESTUD.",
+          "item_type": "GOODS",
+          "uom": "UNI",
+          "quantity": "400",
+          "unit_price": "0.4",
+          "total": "160",
+          "discount": "0",
+          "discount_percentage": "0",
+          "tax_rate": "",
+          "tax_amount": "",
+          "taxes": []
+        },
+        {
+          "description": "FOLHA 80g",
+          "item_type": "GOODS",
+          "uom": "UNI",
+          "quantity": "400",
+          "unit_price": "0",
+          "total": "0",
+          "discount": "0",
+          "discount_percentage": "0",
+          "tax_rate": "",
+          "tax_amount": "",
+          "taxes": []
+        },
+        {
+          "description": "FOLHA 120g",
+          "item_type": "GOODS",
+          "uom": "UNI",
+          "quantity": "200",
+          "unit_price": "0.08",
+          "total": "16",
+          "discount": "0",
+          "discount_percentage": "0",
+          "tax_rate": "",
+          "tax_amount": "",
+          "taxes": []
+        }
+      ]
+    }
+  ],
+  "declined": []
+}

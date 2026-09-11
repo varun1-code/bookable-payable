@@ -1,0 +1,10 @@
+{
+  "file": "HLD-05.pdf",
+  "payables": [],
+  "declined": [
+    {
+      "doc_type": "UNPROCESSED",
+      "reason": "pipeline error: Expecting ',' delimiter: line 1 column 5368 (char 5367)"
+    }
+  ]
+}

@@ -1,0 +1,5 @@
+pymupdf>=1.24
+pillow>=10
+openai>=1.40
+python-dotenv>=1.0
+rapidfuzz>=3.6

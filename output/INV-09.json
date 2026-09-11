@@ -1,0 +1,77 @@
+{
+  "file": "INV-09.pdf",
+  "payables": [
+    {
+      "invoice_number": "11768395",
+      "invoice_date": "2025-06-06",
+      "due_date": "2025-06-27",
+      "invoice_type": "INVOICE",
+      "currency": "EUR",
+      "supplier": {
+        "name": "Cloverdale Trading",
+        "supplier_id": "",
+        "address": "10112, Gartnertweg 13, Harju county ESTONIA",
+        "vat_id": "EE418700796"
+      },
+      "buyer": {
+        "company_code": "",
+        "business_unit_code": "",
+        "location_code": ""
+      },
+      "payment_term_id": "",
+      "po_number": "",
+      "po_id": "",
+      "gross_total": "37767.32",
+      "subtotal": "31889.09",
+      "total_tax_amount": "5878.23",
+      "discount_amount": "",
+      "freight_charges": "",
+      "insurance_charges": "",
+      "extra_charges": "",
+      "excise_duties": "",
+      "taxes": [
+        {
+          "tax_type": "VAT",
+          "tax_name": "KM alus VAT C.A",
+          "tax_rate": "0",
+          "tax_amount": "0",
+          "tax_type_code": "DE_000_RC"
+        }
+      ],
+      "line_items": [
+        {
+          "description": "Import duties",
+          "item_type": "SERVICE",
+          "uom": "",
+          "quantity": "",
+          "unit_price": "",
+          "total": "",
+          "discount": "",
+          "discount_percentage": "",
+          "tax_rate": "",
+          "tax_amount": "",
+          "taxes": []
+        },
+        {
+          "description": "Customs VAT",
+          "item_type": "SERVICE",
+          "uom": "",
+          "quantity": "",
+          "unit_price": "",
+          "total": "",
+          "discount": "",
+          "discount_percentage": "",
+          "tax_rate": "",
+          "tax_amount": "",
+          "taxes": []
+        }
+      ]
+    }
+  ],
+  "declined": [
+    {
+      "doc_type": "customs declaration",
+      "reason": "This is a customs declaration document, not an invoice"
+    }
+  ]
+}

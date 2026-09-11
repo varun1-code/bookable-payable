@@ -1,0 +1,71 @@
+{
+  "file": "INV-31.pdf",
+  "payables": [
+    {
+      "invoice_number": "39015",
+      "invoice_date": "2018-06-01",
+      "due_date": "2018-06-11",
+      "invoice_type": "INVOICE",
+      "currency": "USD",
+      "supplier": {
+        "name": "100 Airport KPG III, LLC",
+        "supplier_id": "",
+        "address": "Suite 400\n125 E Elm Street\nConshohocken, PA 19428",
+        "vat_id": ""
+      },
+      "buyer": {
+        "company_code": "",
+        "business_unit_code": "",
+        "location_code": ""
+      },
+      "payment_term_id": "",
+      "po_number": "16299",
+      "po_id": "",
+      "gross_total": "17657.53",
+      "subtotal": "17657.53",
+      "total_tax_amount": "845.35",
+      "discount_amount": "",
+      "freight_charges": "",
+      "insurance_charges": "",
+      "extra_charges": "",
+      "excise_duties": "",
+      "taxes": [
+        {
+          "tax_type": "Taxes & Fees",
+          "tax_name": "State Tax Adjustment",
+          "tax_rate": "",
+          "tax_amount": "845.35",
+          "tax_type_code": ""
+        },
+        {
+          "tax_type": "Taxes & Fees",
+          "tax_name": "Sales Tax",
+          "tax_rate": "",
+          "tax_amount": "165.15",
+          "tax_type_code": ""
+        }
+      ],
+      "line_items": [
+        {
+          "description": "Electric 04/27/18-05/16/18",
+          "item_type": "SERVICE",
+          "uom": "",
+          "quantity": "100",
+          "unit_price": "",
+          "total": "17657.53",
+          "discount": "",
+          "discount_percentage": "",
+          "tax_rate": "",
+          "tax_amount": "",
+          "taxes": []
+        }
+      ]
+    }
+  ],
+  "declined": [
+    {
+      "doc_type": "Utility Bill",
+      "reason": "This is a utility bill, not an invoice"
+    }
+  ]
+}

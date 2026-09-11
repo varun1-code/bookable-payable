@@ -1,0 +1,59 @@
+{
+  "file": "INV-34.pdf",
+  "payables": [
+    {
+      "invoice_number": "1220-127612",
+      "invoice_date": "2015-06-20",
+      "due_date": "2015-06-27",
+      "invoice_type": "INVOICE",
+      "currency": "$",
+      "supplier": {
+        "name": "Asian Pacific Serviced Offices Pty Ltd",
+        "supplier_id": "",
+        "address": "Level 3, 480 Collins Street Melbourne VIC 3000",
+        "vat_id": "ABN: 11 068 012 653"
+      },
+      "buyer": {
+        "company_code": "",
+        "business_unit_code": "",
+        "location_code": ""
+      },
+      "payment_term_id": "",
+      "po_number": "",
+      "po_id": "",
+      "gross_total": "572",
+      "subtotal": "520",
+      "total_tax_amount": "52",
+      "discount_amount": "",
+      "freight_charges": "",
+      "insurance_charges": "",
+      "extra_charges": "",
+      "excise_duties": "",
+      "taxes": [
+        {
+          "tax_type": "GST",
+          "tax_name": "GST",
+          "tax_rate": "10",
+          "tax_amount": "52",
+          "tax_type_code": "SG_090_GST"
+        }
+      ],
+      "line_items": [
+        {
+          "description": "Workstation",
+          "item_type": "SERVICE",
+          "uom": "",
+          "quantity": "",
+          "unit_price": "",
+          "total": "520",
+          "discount": "",
+          "discount_percentage": "",
+          "tax_rate": "",
+          "tax_amount": "",
+          "taxes": []
+        }
+      ]
+    }
+  ],
+  "declined": []
+}

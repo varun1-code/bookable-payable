@@ -1,0 +1,228 @@
+{
+  "file": "INV-13.pdf",
+  "payables": [
+    {
+      "invoice_number": "1410",
+      "invoice_date": "2026-04-30",
+      "due_date": "2026-05-30",
+      "invoice_type": "INVOICE",
+      "currency": "EUR",
+      "supplier": {
+        "name": "Northwind Services EE Õö",
+        "supplier_id": "",
+        "address": "Rua do Ouro 15\n10134 Kesklina linnaosa, Tallinn, Harju maakond",
+        "vat_id": "EE258627691"
+      },
+      "buyer": {
+        "company_code": "BOLTGROUP",
+        "business_unit_code": "",
+        "location_code": "LOC_EE_001"
+      },
+      "payment_term_id": "",
+      "po_number": "",
+      "po_id": "",
+      "gross_total": "152587.46",
+      "subtotal": "127564.34",
+      "total_tax_amount": "25023.12",
+      "discount_amount": "",
+      "freight_charges": "",
+      "insurance_charges": "",
+      "extra_charges": "",
+      "excise_duties": "",
+      "taxes": [
+        {
+          "tax_type": "VAT",
+          "tax_name": "KM%",
+          "tax_rate": "24",
+          "tax_amount": "25023.12",
+          "tax_type_code": "EST_240_VAT"
+        }
+      ],
+      "line_items": [
+        {
+          "description": "Parking fee EUROPARK",
+          "item_type": "SERVICE",
+          "uom": "",
+          "quantity": "1",
+          "unit_price": "63479.69",
+          "total": "63479.69",
+          "discount": "",
+          "discount_percentage": "",
+          "tax_rate": "",
+          "tax_amount": "",
+          "taxes": []
+        },
+        {
+          "description": "Parking fee EUROPARK discount 20%",
+          "item_type": "SERVICE",
+          "uom": "",
+          "quantity": "-1",
+          "unit_price": "12695.94",
+          "total": "-12695.94",
+          "discount": "",
+          "discount_percentage": "",
+          "tax_rate": "",
+          "tax_amount": "",
+          "taxes": []
+        },
+        {
+          "description": "Parking fee EUROPARK success fee",
+          "item_type": "SERVICE",
+          "uom": "",
+          "quantity": "1",
+          "unit_price": "3173.98",
+          "total": "3173.98",
+          "discount": "",
+          "discount_percentage": "",
+          "tax_rate": "",
+          "tax_amount": "",
+          "taxes": []
+        },
+        {
+          "description": "Parking fee EUROPARK KESKLINN",
+          "item_type": "SERVICE",
+          "uom": "",
+          "quantity": "1",
+          "unit_price": "1069",
+          "total": "1069",
+          "discount": "",
+          "discount_percentage": "",
+          "tax_rate": "",
+          "tax_amount": "",
+          "taxes": []
+        },
+        {
+          "description": "Parking fee EUROPARK SUDALINN",
+          "item_type": "SERVICE",
+          "uom": "",
+          "quantity": "1",
+          "unit_price": "875.1",
+          "total": "875.1",
+          "discount": "",
+          "discount_percentage": "",
+          "tax_rate": "",
+          "tax_amount": "",
+          "taxes": []
+        },
+        {
+          "description": "Parking start fee EUROPARK",
+          "item_type": "SERVICE",
+          "uom": "",
+          "quantity": "1",
+          "unit_price": "1939.8",
+          "total": "1939.8",
+          "discount": "",
+          "discount_percentage": "",
+          "tax_rate": "",
+          "tax_amount": "",
+          "taxes": []
+        },
+        {
+          "description": "Parking fee OHISTEENUSED OPEN AREA",
+          "item_type": "SERVICE",
+          "uom": "",
+          "quantity": "1",
+          "unit_price": "6976.8",
+          "total": "6976.8",
+          "discount": "",
+          "discount_percentage": "",
+          "tax_rate": "",
+          "tax_amount": "",
+          "taxes": []
+        },
+        {
+          "description": "Parking fee OHISTEENUSED OPEN AREA discount 20%",
+          "item_type": "SERVICE",
+          "uom": "",
+          "quantity": "-1",
+          "unit_price": "215.17",
+          "total": "-215.17",
+          "discount": "",
+          "discount_percentage": "",
+          "tax_rate": "",
+          "tax_amount": "",
+          "taxes": []
+        },
+        {
+          "description": "Parking fee OHISTEENUSED TARTU",
+          "item_type": "SERVICE",
+          "uom": "",
+          "quantity": "1",
+          "unit_price": "119",
+          "total": "119",
+          "discount": "",
+          "discount_percentage": "",
+          "tax_rate": "",
+          "tax_amount": "",
+          "taxes": []
+        },
+        {
+          "description": "Parking start fee OHISTEENUSED",
+          "item_type": "SERVICE",
+          "uom": "",
+          "quantity": "1",
+          "unit_price": "20711.63",
+          "total": "20711.63",
+          "discount": "",
+          "discount_percentage": "",
+          "tax_rate": "",
+          "tax_amount": "",
+          "taxes": []
+        },
+        {
+          "description": "Parking fee AVALIKUD TEENUSED",
+          "item_type": "SERVICE",
+          "uom": "",
+          "quantity": "1",
+          "unit_price": "2379.2",
+          "total": "2379.2",
+          "discount": "",
+          "discount_percentage": "",
+          "tax_rate": "",
+          "tax_amount": "",
+          "taxes": []
+        },
+        {
+          "description": "Parking start fee AVALIKUD TEENUSED",
+          "item_type": "SERVICE",
+          "uom": "",
+          "quantity": "1",
+          "unit_price": "1952.18",
+          "total": "1952.18",
+          "discount": "",
+          "discount_percentage": "",
+          "tax_rate": "",
+          "tax_amount": "",
+          "taxes": []
+        },
+        {
+          "description": "Parking start fee Snabb",
+          "item_type": "SERVICE",
+          "uom": "",
+          "quantity": "1",
+          "unit_price": "160.85",
+          "total": "160.85",
+          "discount": "",
+          "discount_percentage": "",
+          "tax_rate": "",
+          "tax_amount": "",
+          "taxes": []
+        },
+        {
+          "description": "Parking fee Mahtra 5 / Mahtra 27",
+          "item_type": "SERVICE",
+          "uom": "",
+          "quantity": "1",
+          "unit_price": "50",
+          "total": "50",
+          "discount": "",
+          "discount_percentage": "",
+          "tax_rate": "",
+          "tax_amount": "",
+          "taxes": []
+        }
+      ]
+    }
+  ],
+  "declined": []
+}

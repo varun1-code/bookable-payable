@@ -1,0 +1,14 @@
+{
+  "file": "DU-05s.pdf",
+  "payables": [],
+  "declined": [
+    {
+      "doc_type": "Delivery note",
+      "reason": "A delivery note is a logistics document that records the transfer of goods from a supplier to a buyer and is not a payable."
+    },
+    {
+      "doc_type": "Shipment Receipt",
+      "reason": "A shipment receipt is a logistics document that confirms the receipt of goods and is not a payable."
+    }
+  ]
+}

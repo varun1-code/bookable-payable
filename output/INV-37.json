@@ -1,0 +1,10 @@
+{
+  "file": "INV-37.pdf",
+  "payables": [],
+  "declined": [
+    {
+      "doc_type": "UTILITY REIMBURSEMENT",
+      "reason": "This is a utility reimbursement statement, not a payable invoice"
+    }
+  ]
+}

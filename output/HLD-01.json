@@ -1,0 +1,66 @@
+{
+  "file": "HLD-01.pdf",
+  "payables": [
+    {
+      "invoice_number": "S1667502-467",
+      "invoice_date": "2023-05-25",
+      "due_date": "",
+      "invoice_type": "INVOICE",
+      "currency": "BAHT",
+      "supplier": {
+        "name": "RANGSIRI BEVERAGES (THAILAND) LIMITED",
+        "supplier_id": "",
+        "address": "12080",
+        "vat_id": "5901619152"
+      },
+      "buyer": {
+        "company_code": "",
+        "business_unit_code": "",
+        "location_code": ""
+      },
+      "payment_term_id": "",
+      "po_number": "",
+      "po_id": "",
+      "gross_total": "8161.92",
+      "subtotal": "7200",
+      "total_tax_amount": "1261.92",
+      "discount_amount": "",
+      "freight_charges": "",
+      "insurance_charges": "",
+      "extra_charges": "648",
+      "excise_duties": "",
+      "taxes": [
+        {
+          "tax_type": "VAT",
+          "tax_name": "VAT 7%",
+          "tax_rate": "7",
+          "tax_amount": "549.36",
+          "tax_type_code": "TH_070_VAT"
+        },
+        {
+          "tax_type": "WITHHOLDING TAX",
+          "tax_name": "WITHHOLDING TAX 3%",
+          "tax_rate": "3",
+          "tax_amount": "-235.44",
+          "tax_type_code": "TH_WHT_003"
+        }
+      ],
+      "line_items": [
+        {
+          "description": "Staff 2 Units X 6 Days",
+          "item_type": "SERVICE",
+          "uom": "",
+          "quantity": "12",
+          "unit_price": "600",
+          "total": "7200",
+          "discount": "",
+          "discount_percentage": "",
+          "tax_rate": "",
+          "tax_amount": "",
+          "taxes": []
+        }
+      ]
+    }
+  ],
+  "declined": []
+}

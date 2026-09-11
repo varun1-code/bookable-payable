@@ -1,0 +1,10 @@
+{
+  "file": "DU-11.pdf",
+  "payables": [],
+  "declined": [
+    {
+      "doc_type": "Credit note",
+      "reason": "This document is a credit note issued by Tavolo to Northwind Operations OU, showing a negative amount (-400.00 EUR) as a refund or adjustment, not a payable invoice"
+    }
+  ]
+}

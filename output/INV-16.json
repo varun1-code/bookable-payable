@@ -1,0 +1,59 @@
+{
+  "file": "INV-16.pdf",
+  "payables": [
+    {
+      "invoice_number": "TLIR72836045",
+      "invoice_date": "2025-06-09",
+      "due_date": "2025-07-07",
+      "invoice_type": "INVOICE",
+      "currency": "EUR",
+      "supplier": {
+        "name": "Speedwell Express Estonia AS",
+        "supplier_id": "",
+        "address": "Bahnhoftrasse 32 11415 Tallinn ESTONIA",
+        "vat_id": "EE98974645804538087"
+      },
+      "buyer": {
+        "company_code": "BOLTGROUP",
+        "business_unit_code": "",
+        "location_code": "LOC_EE_001"
+      },
+      "payment_term_id": "",
+      "po_number": "",
+      "po_id": "",
+      "gross_total": "26.47",
+      "subtotal": "21.7",
+      "total_tax_amount": "4.77",
+      "discount_amount": "",
+      "freight_charges": "2.83",
+      "insurance_charges": "",
+      "extra_charges": "",
+      "excise_duties": "",
+      "taxes": [
+        {
+          "tax_type": "VAT",
+          "tax_name": "KM",
+          "tax_rate": "22",
+          "tax_amount": "4.77",
+          "tax_type_code": "EST_220_VAT"
+        }
+      ],
+      "line_items": [
+        {
+          "description": "ECONOMY SELECT",
+          "item_type": "SERVICE",
+          "uom": "Kg",
+          "quantity": "1",
+          "unit_price": "18.87",
+          "total": "18.87",
+          "discount": "",
+          "discount_percentage": "",
+          "tax_rate": "",
+          "tax_amount": "",
+          "taxes": []
+        }
+      ]
+    }
+  ],
+  "declined": []
+}

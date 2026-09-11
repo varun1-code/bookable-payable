@@ -1,0 +1,93 @@
+{
+  "file": "INV-19.pdf",
+  "payables": [
+    {
+      "invoice_number": "",
+      "invoice_date": "",
+      "due_date": "",
+      "invoice_type": "INVOICE",
+      "currency": "GHC",
+      "supplier": {
+        "name": "Redwater Technologies",
+        "supplier_id": "",
+        "address": "Lindenstrasse 111",
+        "vat_id": "C9765403675"
+      },
+      "buyer": {
+        "company_code": "",
+        "business_unit_code": "",
+        "location_code": ""
+      },
+      "payment_term_id": "",
+      "po_number": "",
+      "po_id": "",
+      "gross_total": "8045.4",
+      "subtotal": "6600",
+      "total_tax_amount": "1445.4",
+      "discount_amount": "",
+      "freight_charges": "",
+      "insurance_charges": "",
+      "extra_charges": "",
+      "excise_duties": "",
+      "taxes": [
+        {
+          "tax_type": "NHIL",
+          "tax_name": "NHIL (2.5%)",
+          "tax_rate": "2.5",
+          "tax_amount": "165",
+          "tax_type_code": "TAX028"
+        },
+        {
+          "tax_type": "OTHER",
+          "tax_name": "GETFund Levy (2.5%)",
+          "tax_rate": "2.5",
+          "tax_amount": "165",
+          "tax_type_code": "TAX028"
+        },
+        {
+          "tax_type": "OTHER",
+          "tax_name": "COVID-19 Levy (1%)",
+          "tax_rate": "1",
+          "tax_amount": "66",
+          "tax_type_code": "TAX030"
+        },
+        {
+          "tax_type": "VAT",
+          "tax_name": "VAT (15%)",
+          "tax_rate": "15",
+          "tax_amount": "996",
+          "tax_type_code": "ZAF_150_VAT"
+        }
+      ],
+      "line_items": [
+        {
+          "description": "Meal per head",
+          "item_type": "GOODS",
+          "uom": "",
+          "quantity": "60",
+          "unit_price": "90",
+          "total": "5400",
+          "discount": "",
+          "discount_percentage": "",
+          "tax_rate": "",
+          "tax_amount": "",
+          "taxes": []
+        },
+        {
+          "description": "Transportation and Set up",
+          "item_type": "SERVICE",
+          "uom": "",
+          "quantity": "1",
+          "unit_price": "1200",
+          "total": "1200",
+          "discount": "",
+          "discount_percentage": "",
+          "tax_rate": "",
+          "tax_amount": "",
+          "taxes": []
+        }
+      ]
+    }
+  ],
+  "declined": []
+}

@@ -1,0 +1,64 @@
+{
+  "file": "INV-33.pdf",
+  "payables": [
+    {
+      "invoice_number": "ADIPINV/070/17",
+      "invoice_date": "2017-06-08",
+      "due_date": "",
+      "invoice_type": "INVOICE",
+      "currency": "$",
+      "supplier": {
+        "name": "AD NOTIONS INT'L PTE. LTD.",
+        "supplier_id": "",
+        "address": "20 Sin Ming Lane Midview City #08-61 Singapore 573988",
+        "vat_id": ""
+      },
+      "buyer": {
+        "company_code": "",
+        "business_unit_code": "",
+        "location_code": ""
+      },
+      "payment_term_id": "",
+      "po_number": "",
+      "po_id": "",
+      "gross_total": "250",
+      "subtotal": "250",
+      "total_tax_amount": "",
+      "discount_amount": "",
+      "freight_charges": "",
+      "insurance_charges": "",
+      "extra_charges": "",
+      "excise_duties": "",
+      "taxes": [
+        {
+          "tax_type": "",
+          "tax_name": "",
+          "tax_rate": "",
+          "tax_amount": "",
+          "tax_type_code": ""
+        }
+      ],
+      "line_items": [
+        {
+          "description": "Pillar Signage Panel For Shuttle Service Coach Bay (Lot No. 8) Supply of 2mm thick clear poly-carbonate sheet w/ black color base & install onto existing pillar with with reverse digital print Matt lamination onto panel surface. Please note: drilling work is applicable for this job (Day Work per pc. @ $70.00 per trip) *Excluding any dismantling work.",
+          "item_type": "GOODS",
+          "uom": "pc",
+          "quantity": "01",
+          "unit_price": "250",
+          "total": "250",
+          "discount": "",
+          "discount_percentage": "",
+          "tax_rate": "",
+          "tax_amount": "",
+          "taxes": []
+        }
+      ]
+    }
+  ],
+  "declined": [
+    {
+      "doc_type": "",
+      "reason": ""
+    }
+  ]
+}

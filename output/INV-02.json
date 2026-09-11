@@ -1,0 +1,241 @@
+{
+  "file": "INV-02.pdf",
+  "payables": [
+    {
+      "invoice_number": "9972-907",
+      "invoice_date": "2026-03-18",
+      "due_date": "2026-04-01",
+      "invoice_type": "INVOICE",
+      "currency": "EUR",
+      "supplier": {
+        "name": "Meridian Logistics OÜ",
+        "supplier_id": "",
+        "address": "Avenida Central 22\n50106 Tartu linn\nEstonia",
+        "vat_id": ""
+      },
+      "buyer": {
+        "company_code": "BOLTGROUP",
+        "business_unit_code": "EE001",
+        "location_code": "LOC_EE_001"
+      },
+      "payment_term_id": "",
+      "po_number": "",
+      "po_id": "",
+      "gross_total": "608.23",
+      "subtotal": "538.6",
+      "total_tax_amount": "117.72",
+      "discount_amount": "48.09",
+      "freight_charges": "50",
+      "insurance_charges": "",
+      "extra_charges": "",
+      "excise_duties": "",
+      "taxes": [
+        {
+          "tax_type": "VAT",
+          "tax_name": "Kaibemaks",
+          "tax_rate": "24",
+          "tax_amount": "117.72",
+          "tax_type_code": "EST_240_VAT"
+        }
+      ],
+      "line_items": [
+        {
+          "description": "Led Bar FOS Luminus BAR",
+          "item_type": "GOODS",
+          "uom": "24 tundi",
+          "quantity": "9",
+          "unit_price": "6",
+          "total": "54",
+          "discount": "",
+          "discount_percentage": "",
+          "tax_rate": "",
+          "tax_amount": "",
+          "taxes": []
+        },
+        {
+          "description": "Meremind ADJ Starburst",
+          "item_type": "GOODS",
+          "uom": "24 tundi",
+          "quantity": "1",
+          "unit_price": "10",
+          "total": "10",
+          "discount": "",
+          "discount_percentage": "",
+          "tax_rate": "",
+          "tax_amount": "",
+          "taxes": []
+        },
+        {
+          "description": "Pioneer CDJ-3000",
+          "item_type": "GOODS",
+          "uom": "24 tundi",
+          "quantity": "2",
+          "unit_price": "45",
+          "total": "90",
+          "discount": "",
+          "discount_percentage": "",
+          "tax_rate": "",
+          "tax_amount": "",
+          "taxes": []
+        },
+        {
+          "description": "Pioneer DJM-900NXS2 mixer",
+          "item_type": "GOODS",
+          "uom": "24 tundi",
+          "quantity": "1",
+          "unit_price": "103.6",
+          "total": "103.6",
+          "discount": "",
+          "discount_percentage": "",
+          "tax_rate": "",
+          "tax_amount": "",
+          "taxes": []
+        },
+        {
+          "description": "DJ laud 2m x 0,5m =1m",
+          "item_type": "GOODS",
+          "uom": "24 tundi",
+          "quantity": "1",
+          "unit_price": "20",
+          "total": "20",
+          "discount": "",
+          "discount_percentage": "",
+          "tax_rate": "",
+          "tax_amount": "",
+          "taxes": []
+        },
+        {
+          "description": "Aktivikõlar Veritas 8000 komplekt",
+          "item_type": "GOODS",
+          "uom": "24 tundi",
+          "quantity": "1",
+          "unit_price": "0.1",
+          "total": "0.1",
+          "discount": "",
+          "discount_percentage": "",
+          "tax_rate": "",
+          "tax_amount": "",
+          "taxes": []
+        },
+        {
+          "description": "Aktivikõlar NOVA Veritas 12",
+          "item_type": "GOODS",
+          "uom": "24 tundi",
+          "quantity": "2",
+          "unit_price": "3.6",
+          "total": "7.2",
+          "discount": "",
+          "discount_percentage": "",
+          "tax_rate": "",
+          "tax_amount": "",
+          "taxes": []
+        },
+        {
+          "description": "Aktivisubwoofer Nova Veritas 18S",
+          "item_type": "GOODS",
+          "uom": "24 tundi",
+          "quantity": "2",
+          "unit_price": "0",
+          "total": "0",
+          "discount": "",
+          "discount_percentage": "",
+          "tax_rate": "",
+          "tax_amount": "",
+          "taxes": []
+        },
+        {
+          "description": "Toitejuhe",
+          "item_type": "GOODS",
+          "uom": "Fiksiseeritud",
+          "quantity": "4",
+          "unit_price": "0",
+          "total": "0",
+          "discount": "",
+          "discount_percentage": "",
+          "tax_rate": "",
+          "tax_amount": "",
+          "taxes": []
+        },
+        {
+          "description": "Kölär stativ KäM ring lock vahpepost (pikk)",
+          "item_type": "GOODS",
+          "uom": "24 tundi",
+          "quantity": "2",
+          "unit_price": "84",
+          "total": "168",
+          "discount": "",
+          "discount_percentage": "",
+          "tax_rate": "",
+          "tax_amount": "",
+          "taxes": []
+        },
+        {
+          "description": "XLRL kaabel 10m",
+          "item_type": "GOODS",
+          "uom": "24 tundi",
+          "quantity": "2",
+          "unit_price": "0",
+          "total": "0",
+          "discount": "",
+          "discount_percentage": "",
+          "tax_rate": "",
+          "tax_amount": "",
+          "taxes": []
+        },
+        {
+          "description": "XLRL kaabel 3m",
+          "item_type": "GOODS",
+          "uom": "24 tundi",
+          "quantity": "2",
+          "unit_price": "0",
+          "total": "0",
+          "discount": "",
+          "discount_percentage": "",
+          "tax_rate": "",
+          "tax_amount": "",
+          "taxes": []
+        },
+        {
+          "description": "Pikendusjuhe 5m",
+          "item_type": "GOODS",
+          "uom": "3 tundi",
+          "quantity": "3",
+          "unit_price": "0",
+          "total": "0",
+          "discount": "",
+          "discount_percentage": "",
+          "tax_rate": "",
+          "tax_amount": "",
+          "taxes": []
+        },
+        {
+          "description": "Linnasiseene transport",
+          "item_type": "FREIGHT",
+          "uom": "",
+          "quantity": "1",
+          "unit_price": "",
+          "total": "50",
+          "discount": "",
+          "discount_percentage": "",
+          "tax_rate": "",
+          "tax_amount": "",
+          "taxes": []
+        },
+        {
+          "description": "Tehnik",
+          "item_type": "GOODS",
+          "uom": "",
+          "quantity": "2",
+          "unit_price": "",
+          "total": "",
+          "discount": "",
+          "discount_percentage": "",
+          "tax_rate": "",
+          "tax_amount": "",
+          "taxes": []
+        }
+      ]
+    }
+  ],
+  "declined": []
+}
