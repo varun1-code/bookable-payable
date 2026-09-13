@@ -179,6 +179,42 @@ def _find_matching_brace(text: str, start: int) -> int | None:
     return None
 
 
+_CLOSERS = {"{": "}", "[": "]"}
+
+
+def _unclosed_bracket_stack(s: str) -> list[str]:
+    """Walk `s` tracking which `{`/`[` are still open, in the order they were
+    opened (so the caller can close them LIFO), skipping over string content
+    so braces/brackets inside description text don't confuse it."""
+    stack: list[str] = []
+    in_string = False
+    escape = False
+    for c in s:
+        if in_string:
+            if escape:
+                escape = False
+            elif c == "\\":
+                escape = True
+            elif c == '"':
+                in_string = False
+            continue
+        if c == '"':
+            in_string = True
+        elif c in "{[":
+            stack.append(c)
+        elif c in "}]" and stack:
+            stack.pop()
+    return stack
+
+
+def _closing_sequence(s: str) -> str:
+    """The exact sequence of closing brackets needed to close every bracket
+    still open in `s`, in the correct (innermost-first) order - NOT just
+    ']'*n_square + '}'*n_curly, which is wrong whenever arrays and objects
+    are nested inside each other (e.g. '{"a": [{' needs '}]}', not ']}}')."""
+    return "".join(_CLOSERS[c] for c in reversed(_unclosed_bracket_stack(s)))
+
+
 def _repair_json(s: str) -> str:
     """Best-effort repair for near-valid JSON. Two tiers:
     1. The output is complete content that's just missing its closing
@@ -190,16 +226,15 @@ def _repair_json(s: str) -> str:
     """
     s = re.sub(r",\s*([}\]])", r"\1", s)
 
-    depth_curly = s.count("{") - s.count("}")
-    depth_square = s.count("[") - s.count("]")
-    closer = "]" * max(0, depth_square) + "}" * max(0, depth_curly)
-    if s.count('"') % 2 == 0 and (depth_curly > 0 or depth_square > 0):
-        candidate = s + closer
-        try:
-            json.loads(candidate, strict=False)
-            return candidate
-        except json.JSONDecodeError:
-            pass
+    if s.count('"') % 2 == 0:
+        closer = _closing_sequence(s)
+        if closer:
+            candidate = s + closer
+            try:
+                json.loads(candidate, strict=False)
+                return candidate
+            except json.JSONDecodeError:
+                pass
 
     try:
         json.loads(s, strict=False)
@@ -212,10 +247,8 @@ def _repair_json(s: str) -> str:
     last_comma = truncated.rfind(",")
     if last_comma != -1:
         truncated = truncated[:last_comma]
-    depth_curly = truncated.count("{") - truncated.count("}")
-    depth_square = truncated.count("[") - truncated.count("]")
     # Close an odd number of unescaped quotes (a value cut off mid-string).
     if truncated.count('"') % 2 == 1:
         truncated += '"'
-    truncated += "]" * max(0, depth_square) + "}" * max(0, depth_curly)
+    truncated += _closing_sequence(truncated)
     return truncated

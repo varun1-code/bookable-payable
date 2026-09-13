@@ -72,10 +72,13 @@ None of those questions require having seen the specific template before.
 
 The self-check loop is the actual generalisation mechanism, more than any prompt wording: every
 assembled payable is run back through the real `erp.py`, compared to the document's own stated
-gross, and — on a mismatch — retried once with the specific numeric gap and a short checklist of
-known failure shapes (tax declared twice, a withholding sign, a missing header charge) fed back to
-the model. That's verifying against the same oracle the grader uses, not hoping the first read was
-right.
+gross, and — on a mismatch — retried up to twice, each time with the specific numeric gap and a short
+checklist of known failure shapes (tax declared twice, a withholding sign, a missing header charge)
+fed back to the model. Bounding it at two rather than one matters for documents that need two
+independent corrections in sequence (e.g. a sign fix on the first pass still leaves a double-declared
+tax uncaught until the second); it stops as soon as a payable foots, so a clean first read costs
+nothing extra. That's verifying against the same oracle the grader uses, not hoping the first read
+was right.
 
 Master-data resolution (`src/master_match.py`) never guesses either: every code is an exact key
 match (VAT id, PO number), a fuzzy name match that clears a decisive score margin, or blank. A new
@@ -101,11 +104,14 @@ valuation paperwork, produced to classify and value goods for cross-border movem
 amount of careful reading turns a valuation document into a payable, because the one thing that would
 make it one — an obligation, stated by someone, to pay someone — genuinely isn't on the page to find.
 
-I did not have the budget (see below) to read all 20 pages individually to confirm the pattern holds
-throughout; I sampled representative pages and flagged the file for manual review rather than assert
-a blanket judgement I hadn't fully earned by reading every page. That is itself an instance of Rule
-3: a correction — here, a declined-as-non-payable judgement — that isn't backed by evidence you
-actually checked is the same failure mode as a fix that fires where it shouldn't.
+I initially sampled representative pages rather than reading all 20 individually, and said so rather
+than assert a blanket judgement I hadn't fully earned — that's itself an instance of Rule 3: a
+correction (here, a declined-as-non-payable judgement) that isn't backed by evidence you actually
+checked is the same failure mode as a fix that fires where it shouldn't. I've since gone back and
+read all 20 pages one by one: page 1-2 is a Customs Consolidated Invoice, pages 3-20 are 18 separate
+Customs Detailed Invoice sections (one per shipment, each its own delivery/sales-order number), all
+between the same seller and consignee. Every page follows the identical non-payable shape — the
+conclusion holds on the full document, not just the sample.
 
 ## Current state, and what's still imperfect
 
@@ -127,9 +133,18 @@ Of the four that don't:
   in favour of a printed charge. This is a genuine capability ceiling of the specific vision model
   used here, not a rule the model didn't know.
 - `INV-26` (a 35-line Malaysian retail receipt) I re-transcribed by hand from the source page after
-  the model's read proved unreliable, and narrowed the gap from 342 to 27 units - but couldn't fully
-  close it; a small number of cells in that specific table remain genuinely hard for me to read with
-  certainty too, and I stopped rather than guess the remainder to force a match.
+  the model's read proved unreliable, and narrowed the gap from 342 to 27.40 units. I went back a
+  second time with a targeted 600 DPI crop of the full table and re-verified every numbered line
+  individually against `output/INV-26.json` - all 34 real lines (the table is numbered 1-29 then
+  31-35; row 30 carries no quantity, price, or amount at all, its position occupied by an unrelated
+  overlapping label, the same overlap-artifact pattern visible in this document's own header) match
+  exactly, and sum to the same 846.13 already in the output. That confirms the extraction itself was
+  already correct - the 27.40 gap is not a legibility failure on my part. It's that the document's
+  own line items don't sum to the document's own printed subtotal (873.53): most likely a
+  voided/cancelled line 30 whose net effect the source system folded into the header total while
+  dropping its supporting row from the printed page. I did not invent a line item to close that gap,
+  because a document that doesn't foot against itself can't be made to foot honestly - that's the
+  exact fabrication Rule 1 forbids.
 
 Four other documents (`HLD-03`, `HLD-05`, `HLD-10`, and the `DU-02` case above) hit a harder wall: the
 vision model either mis-extracted them badly or, for `HLD-03`, entered a repetition-collapse loop on
@@ -139,3 +154,32 @@ verification is a one-time patch to this run's `output/`, not a fix to the autom
 a held-back document with the same failure shape would still need the pipeline's own retry/repair
 logic (which *was* hardened this session - JSON-repair and repetition-collapse detection are now
 real code, not manual workarounds) to carry it the rest of the way unattended.
+
+### A later, zero-API-cost hardening pass
+
+After the numbers above were reached, I went back over the parts of the system that had only ever
+been exercised by hand, one document at a time, rather than tested on their own:
+
+- **`tests/test_pipeline.py`** (new) exercises the deterministic pieces offline — JSON repair on
+  truncated/malformed model output, repetition-collapse detection, the charge-vs-tax and
+  withholding-sign safety nets in `assemble.py`, and master-data matching (exact-key, fuzzy, and the
+  honest-blank-on-no-match case). Writing it surfaced a genuine bug: `_repair_json`'s bracket-closer
+  built `"]"*n_square + "}"*n_curly` regardless of actual nesting order, which is wrong whenever an
+  array sits inside an object (`{"payables": [{` truncated needs `}]}`, not `]}}`) — it had apparently
+  never hit that exact shape live, but it was one bad truncation away from silently emitting invalid
+  JSON. Fixed with a proper bracket-stack that closes in the correct innermost-first order.
+- **The retry loop is now bounded at two attempts, not one** (`run.py`), so a document needing two
+  independent corrections in sequence — a sign fix on the first pass still leaving a double-declared
+  tax uncaught until the second — has a chance to converge unattended instead of being permanently
+  stuck after a single retry. It still stops immediately once a payable foots, so a clean first read
+  costs nothing extra.
+- **`DU-02`'s non-payable classification was upgraded from a sampled judgement to a full one** — all
+  20 pages read individually rather than a representative subset, closing the specific Rule-3 caveat
+  raised earlier in this document.
+- **`INV-26`'s remaining gap was re-diagnosed, not just re-attempted**: a second, more careful
+  transcription at 600 DPI reproduces the exact same total already in `output/INV-26.json`, which
+  means the original extraction was correct all along and the 27.40 gap is a genuine inconsistency in
+  the source document's own printed subtotal, not a reading error - see the entry above.
+
+None of this cost any API budget; it's the kind of pass that's easy to skip once a number looks good
+enough, which is exactly why it seemed worth doing before calling this finished.

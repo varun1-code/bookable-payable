@@ -4,7 +4,7 @@
   "declined": [
     {
       "doc_type": "Customs Consolidated/Detailed Invoice",
-      "reason": "Customs valuation paperwork (HTS/ECCN classification, net weight, country of origin, 'Extended Total'/'Extended Value' for customs purposes) for cross-border shipments between Novatek entities. No payment terms, remit-to bank details, or 'amount due' framing anywhere in the sampled pages - this is customs/export documentation, not a supplier bill. This 20-page bundle appears to concatenate several such consolidated/detailed customs invoices (different delivery/sales order numbers per section); the pattern was confirmed on a representative sample of pages rather than all 20 individually."
+      "reason": "Customs valuation paperwork (HTS/ECCN classification, net weight, country of origin, 'Extended Total'/'Extended Value' for customs purposes) for cross-border shipments between Novatek entities. No payment terms, remit-to bank details, or 'amount due' framing anywhere in the document - this is customs/export documentation, not a supplier bill. This 20-page bundle concatenates one Customs Consolidated Invoice (pages 1-2) followed by 18 separate single-shipment Customs Detailed Invoice sections (each its own delivery/sales order number), all sharing the same seller (Novatek U.S. LLC / Redwater Mobility BV) and consignee (Sağlık ve Çevre Bilim.LTDŞTİ, Turkey). All 20 pages were read individually; every page follows the same non-payable shape."
     }
   ]
 }

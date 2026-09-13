@@ -46,6 +46,9 @@ same shape as before, for the whole file (all payables + declined).
 """
 
 
+MAX_RETRIES = 2  # bounded: up to 2 targeted retries (3 LLM calls total) per file
+
+
 def process_file(pdf_path: Path, master: MasterData, usage: UsageTotals) -> dict:
     images = render_pdf_pages(pdf_path)
     if len(images) > config.MAX_PAGES_PER_CALL:
@@ -54,12 +57,16 @@ def process_file(pdf_path: Path, master: MasterData, usage: UsageTotals) -> dict
 
     user_text = USER_PROMPT_TEMPLATE.format(filename=pdf_path.name, page_count=len(images))
     raw = call_vision_json(SYSTEM_PROMPT, user_text, images, usage, pdf_path.name, max_tokens=8000)
-
     assembled_payables = [assemble_payable(p, master) for p in raw.get("payables") or []]
 
-    # One bounded, targeted retry per file if any payable doesn't foot.
-    mismatch = _first_mismatch(assembled_payables)
-    if mismatch is not None:
+    # Bounded, targeted retries: each attempt gets the specific numeric gap fed back and can
+    # fix a different root cause than the previous attempt (e.g. a tax-sign fix on attempt 1,
+    # a still-remaining double-declared tax on attempt 2). Stops as soon as it foots, or after
+    # MAX_RETRIES attempts - never an unbounded loop.
+    for attempt in range(1, MAX_RETRIES + 1):
+        mismatch = _first_mismatch(assembled_payables)
+        if mismatch is None:
+            break
         idx, booked, stated = mismatch
         payable = raw["payables"][idx]
         feedback = RETRY_FEEDBACK_TEMPLATE.format(
@@ -73,12 +80,14 @@ def process_file(pdf_path: Path, master: MasterData, usage: UsageTotals) -> dict
         retry_text = user_text + "\n\n" + feedback
         try:
             raw_retry = call_vision_json(
-                SYSTEM_PROMPT, retry_text, images, usage, pdf_path.name + " (retry)", max_tokens=8000
+                SYSTEM_PROMPT, retry_text, images, usage,
+                f"{pdf_path.name} (retry {attempt})", max_tokens=8000,
             )
             assembled_payables = [assemble_payable(p, master) for p in raw_retry.get("payables") or []]
             raw = raw_retry
         except Exception as e:  # noqa: BLE001
-            print(f"  [warn] retry call failed, keeping first attempt: {e}")
+            print(f"  [warn] retry {attempt} call failed, keeping previous attempt: {e}")
+            break
 
     declined = []
     for d in raw.get("declined") or []:

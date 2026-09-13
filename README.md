@@ -14,7 +14,7 @@ codes itself. A small deterministic layer (`src/master_match.py`) then matches s
 payment-term/PO codes against `master_data/*.json` by exact key first (VAT id, PO number) and falls
 back to fuzzy name matching only where no stronger key exists, so it stays cheap even at the "hundreds
 of thousands of rows" scale the brief describes. Every assembled payable is recomputed through the
-real `erp.py` before being written out; a mismatch triggers one bounded retry with the specific gap
+real `erp.py` before being written out; a mismatch triggers up to two bounded retries with the specific gap
 fed back to the model. See `DESIGN.md` for why this shape, not a bank of per-document rules.
 
 ## Setup
@@ -49,6 +49,19 @@ python run.py --limit 3          # smoke-test on the first 3 files
 python run.py --only INV-01      # process a single file by stem
 python run.py --in other_dir --out other_output
 ```
+
+## Tests
+
+```
+python -m pytest tests/ -v
+```
+
+Offline regression tests (no API calls, no cost) for the deterministic parts of the pipeline: JSON
+repair on truncated/malformed model output, repetition-collapse detection, the charge-vs-tax and
+withholding-sign safety nets in `assemble.py`, and master-data matching (exact-key, fuzzy, and the
+honest-blank-on-no-match case). These exist because that logic was previously only ever exercised by
+hand, one document at a time, during the live run — one test (`test_extract_json_does_not_pick_an_earlier_brace_on_truncation`
+and its sibling) caught a real bug in `_repair_json`'s bracket-closing order and is now fixed.
 
 ## Repo layout
 
