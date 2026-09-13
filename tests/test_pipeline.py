@@ -11,13 +11,21 @@ from __future__ import annotations
 import json
 import sys
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from src.assemble import _assemble_tax, _is_charge_not_tax, assemble_payable
-from src.hive_client import _extract_json, _find_matching_brace, _is_degenerate, _repair_json
+from src.hive_client import (
+    MalformedJSONError,
+    _extract_json,
+    _find_matching_brace,
+    _is_degenerate,
+    _repair_json,
+    _unclosed_bracket_stack,
+)
 from src.master_match import MasterData
 
 
@@ -26,21 +34,26 @@ from src.master_match import MasterData
 # ---------------------------------------------------------------------------
 
 def test_extract_json_plain():
-    assert _extract_json('{"a": 1, "b": "x"}') == {"a": 1, "b": "x"}
+    obj, repaired = _extract_json('{"a": 1, "b": "x"}')
+    assert obj == {"a": 1, "b": "x"}
+    assert repaired is False
 
 
 def test_extract_json_fenced_code_block():
     text = '```json\n{"a": 1}\n```'
-    assert _extract_json(text) == {"a": 1}
+    obj, repaired = _extract_json(text)
+    assert obj == {"a": 1}
+    assert repaired is False
 
 
 def test_extract_json_truncated_but_otherwise_complete_is_closed_without_loss():
     # Ran out of tokens right after the last real value - closing brackets
     # should recover every field, not just some of them.
     truncated = '{"payables": [{"invoice_number": "123", "gross_total": "45.00"'
-    result = _extract_json(truncated)
+    result, repaired = _extract_json(truncated)
     assert result["payables"][0]["invoice_number"] == "123"
     assert result["payables"][0]["gross_total"] == "45.00"
+    assert repaired is True
 
 
 def test_extract_json_does_not_pick_an_earlier_brace_on_truncation():
@@ -51,10 +64,11 @@ def test_extract_json_does_not_pick_an_earlier_brace_on_truncation():
         '{"payables": [{"invoice_number": "123"}], '
         '"declined": [{"doc_type": "x", "reason": "still writing this par'
     )
-    result = _extract_json(truncated)
+    result, repaired = _extract_json(truncated)
     # The declined entry got cut mid-string; repair must not silently
     # resurrect a fake empty top-level object from the first "}" it can see.
     assert result["payables"][0]["invoice_number"] == "123"
+    assert repaired is True
 
 
 def test_extract_json_mid_value_truncation_drops_only_the_cut_field():
@@ -76,6 +90,47 @@ def test_find_matching_brace_ignores_braces_inside_strings():
 
 def test_find_matching_brace_returns_none_when_never_closed():
     assert _find_matching_brace('{"a": {"b": 1}', 0) is None
+
+
+# ---------------------------------------------------------------------------
+# Malformed (not just truncated) bracket structure must be REJECTED, not
+# silently "repaired" into something that merely happens to parse.
+# ---------------------------------------------------------------------------
+
+def test_unclosed_bracket_stack_rejects_mismatched_closer():
+    # ']' appears where the innermost open bracket is '{', not '['.
+    with pytest.raises(MalformedJSONError):
+        _unclosed_bracket_stack('{"a": ]')
+
+
+def test_unclosed_bracket_stack_rejects_closer_with_nothing_open():
+    with pytest.raises(MalformedJSONError):
+        _unclosed_bracket_stack('{"a": 1}]')
+
+
+def test_unclosed_bracket_stack_ignores_brackets_inside_strings():
+    # A literal '[' and ']' inside a string value must not affect the stack.
+    # Both the outer '{' and the trailing '[' are genuinely still open here.
+    stack = _unclosed_bracket_stack('{"a": "list-like [1, 2] text", "b": [1')
+    assert stack == ["{", "["]
+
+
+def test_unclosed_bracket_stack_handles_escaped_quotes_before_brackets():
+    # An escaped quote inside the string must not end the string early and
+    # expose the ']' that follows (still inside the string) to the stack.
+    s = '{"a": "quote \\" then ] bracket", "b": [1'
+    stack = _unclosed_bracket_stack(s)
+    assert stack == ["{", "["]
+
+
+def test_extract_json_raises_on_malformed_nesting_instead_of_repairing():
+    with pytest.raises(MalformedJSONError):
+        _extract_json('{"payables": [{"a": ]}')
+
+
+def test_repair_json_raises_on_malformed_nesting():
+    with pytest.raises(MalformedJSONError):
+        _repair_json('{"a": ]')
 
 
 # ---------------------------------------------------------------------------
@@ -176,6 +231,44 @@ def test_ordinary_tax_sign_is_untouched():
 
 
 # ---------------------------------------------------------------------------
+# Decimal, not float, for assemble.py's internal arithmetic
+# ---------------------------------------------------------------------------
+
+def test_charge_reclassification_sums_with_decimal_not_float():
+    # float(0.10) + float(0.20) + float(0.30) == 0.6000000000000001 in binary
+    # floating point; summing several reclassified charges this way would
+    # drift a payable's extra_charges by a fraction of a cent. Decimal must
+    # produce exactly "0.6".
+    master = MasterData()
+    raw = {
+        "currency": "EUR",
+        "gross_total": "1.00",
+        "extra_charges": "",
+        "taxes": [
+            {"tax_type": "TAX", "tax_name": "Fuel Surcharge", "tax_rate": "", "tax_amount": "0.10"},
+            {"tax_type": "TAX", "tax_name": "Handling Fee", "tax_rate": "", "tax_amount": "0.20"},
+            {"tax_type": "TAX", "tax_name": "Service Charge", "tax_rate": "", "tax_amount": "0.30"},
+        ],
+        "line_items": [],
+    }
+    result = assemble_payable(raw, master)
+    assert result["extra_charges"] == "0.6"
+
+
+def test_charge_reclassification_adds_to_existing_extra_charges_exactly():
+    master = MasterData()
+    raw = {
+        "currency": "EUR",
+        "gross_total": "1.00",
+        "extra_charges": "10.10",
+        "taxes": [{"tax_type": "TAX", "tax_name": "Fuel Surcharge", "tax_rate": "", "tax_amount": "0.20"}],
+        "line_items": [],
+    }
+    result = assemble_payable(raw, master)
+    assert result["extra_charges"] == "10.3"
+
+
+# ---------------------------------------------------------------------------
 # Master-data matching (src/master_match.py)
 # ---------------------------------------------------------------------------
 
@@ -206,6 +299,171 @@ def test_po_exact_match_only(master):
 
 def test_tax_no_match_when_country_unknown_and_rate_wrong(master):
     assert master.match_tax("Made Up Tax", "999", "MADEUP", "") == ""
+
+
+# ---------------------------------------------------------------------------
+# Retry must never regress an already-valid payable (run.py)
+# ---------------------------------------------------------------------------
+
+import run  # noqa: E402 - after sys.path setup above
+
+from src import verify  # noqa: E402
+
+
+def _footing_payable(invno: str, amount: str) -> dict:
+    return {
+        "invoice_number": invno,
+        "currency": "USD",
+        "gross_total": amount,
+        "line_items": [{"quantity": "1", "unit_price": amount}],
+    }
+
+
+def test_payable_keys_falls_back_to_index_on_blank_or_duplicate_invoice_number():
+    raw = [{"invoice_number": ""}, {"invoice_number": ""}, {"invoice_number": "X"}]
+    assert run._payable_keys(raw) == ["__idx0__", "__idx1__", "X"]
+
+
+def test_reconcile_retry_keeps_valid_payable_the_retry_drops_entirely():
+    prev_raw = [_footing_payable("A", "100.00"), _footing_payable("B", "999.00")]
+    prev_raw[1]["gross_total"] = "50.00"  # B doesn't foot yet
+    prev_assembled = [dict(p) for p in prev_raw]
+
+    # Retry "fixes" B but silently drops A altogether.
+    new_raw = [_footing_payable("B", "50.00")]
+    new_assembled = [dict(p) for p in new_raw]
+
+    merged_raw, merged_assembled, n_regressed = run._reconcile_retry(
+        prev_raw, prev_assembled, new_raw, new_assembled
+    )
+    assert n_regressed == 1
+    keys = {p["invoice_number"] for p in merged_raw}
+    assert keys == {"A", "B"}
+    for p in merged_assembled:
+        ok, booked, stated = verify.check(p)
+        assert ok, f"{p['invoice_number']}: booked {booked} != stated {stated}"
+
+
+def test_reconcile_retry_rejects_a_valid_payable_turned_invalid():
+    prev_raw = [_footing_payable("A", "100.00")]
+    prev_assembled = [dict(p) for p in prev_raw]
+
+    # Retry returns the same invoice_number but now with a broken total.
+    new_raw = [_footing_payable("A", "100.00")]
+    new_raw[0]["line_items"][0]["unit_price"] = "1.00"  # now books 1.00, not 100.00
+    new_assembled = [dict(p) for p in new_raw]
+
+    merged_raw, merged_assembled, n_regressed = run._reconcile_retry(
+        prev_raw, prev_assembled, new_raw, new_assembled
+    )
+    assert n_regressed == 1
+    assert merged_assembled[0]["line_items"][0]["unit_price"] == "100.00"
+
+
+def test_reconcile_retry_accepts_improvement_on_a_previously_bad_payable():
+    prev_raw = [_footing_payable("A", "50.00")]
+    prev_raw[0]["gross_total"] = "999.00"  # doesn't foot yet
+    prev_assembled = [dict(p) for p in prev_raw]
+
+    new_raw = [_footing_payable("A", "999.00")]  # retry fixed it
+    new_assembled = [dict(p) for p in new_raw]
+
+    merged_raw, merged_assembled, n_regressed = run._reconcile_retry(
+        prev_raw, prev_assembled, new_raw, new_assembled
+    )
+    assert n_regressed == 0
+    ok, booked, stated = verify.check(merged_assembled[0])
+    assert ok
+
+
+def test_process_file_retry_does_not_drop_a_previously_valid_payable():
+    from src.hive_client import UsageTotals
+    from src.master_match import MasterData
+
+    raw1 = {
+        "payables": [
+            _footing_payable("A", "100.00"),
+            {**_footing_payable("B", "50.00"), "line_items": [{"quantity": "1", "unit_price": "999.00"}]},
+        ],
+        "declined": [],
+    }
+    # Retry fixes B but silently drops A - the exact regression this must catch.
+    raw_retry = {"payables": [_footing_payable("B", "50.00")], "declined": []}
+
+    master = MasterData()
+    usage = UsageTotals()
+
+    with patch("run.render_pdf_pages", return_value=["data:image/png;base64,AAAA"]), patch(
+        "run.call_vision_json", side_effect=[(raw1, False), (raw_retry, False)]
+    ):
+        result = run.process_file(Path("dummy.pdf"), master, usage)
+
+    invnos = {p["invoice_number"] for p in result["payables"]}
+    assert invnos == {"A", "B"}
+    for p in result["payables"]:
+        ok, booked, stated = verify.check(p)
+        assert ok, f"{p['invoice_number']}: booked {booked} != stated {stated}"
+
+
+def test_process_file_retry_does_not_accept_valid_payable_turned_decline():
+    from src.hive_client import UsageTotals
+    from src.master_match import MasterData
+
+    raw1 = {
+        "payables": [
+            _footing_payable("A", "100.00"),
+            {**_footing_payable("B", "50.00"), "line_items": [{"quantity": "1", "unit_price": "999.00"}]},
+        ],
+        "declined": [],
+    }
+    # Retry fixes B, but reclassifies A as a decline instead of a payable.
+    raw_retry = {
+        "payables": [_footing_payable("B", "50.00")],
+        "declined": [{"doc_type": "Estimate", "reason": "reclassified on second look"}],
+    }
+
+    master = MasterData()
+    usage = UsageTotals()
+
+    with patch("run.render_pdf_pages", return_value=["data:image/png;base64,AAAA"]), patch(
+        "run.call_vision_json", side_effect=[(raw1, False), (raw_retry, False)]
+    ):
+        result = run.process_file(Path("dummy.pdf"), master, usage)
+
+    invnos = {p["invoice_number"] for p in result["payables"]}
+    assert "A" in invnos, "a previously-valid payable must not be silently reclassified as a decline"
+
+
+def test_process_file_marks_repaired_output_for_review():
+    from src.hive_client import UsageTotals
+    from src.master_match import MasterData
+
+    raw1 = {"payables": [_footing_payable("A", "100.00")], "declined": []}
+    master = MasterData()
+    usage = UsageTotals()
+
+    with patch("run.render_pdf_pages", return_value=["data:image/png;base64,AAAA"]), patch(
+        "run.call_vision_json", return_value=(raw1, True)  # repaired=True
+    ):
+        result = run.process_file(Path("dummy.pdf"), master, usage)
+
+    assert result.get("_needs_review") == "json_repaired"
+
+
+def test_process_file_clean_response_is_not_flagged():
+    from src.hive_client import UsageTotals
+    from src.master_match import MasterData
+
+    raw1 = {"payables": [_footing_payable("A", "100.00")], "declined": []}
+    master = MasterData()
+    usage = UsageTotals()
+
+    with patch("run.render_pdf_pages", return_value=["data:image/png;base64,AAAA"]), patch(
+        "run.call_vision_json", return_value=(raw1, False)
+    ):
+        result = run.process_file(Path("dummy.pdf"), master, usage)
+
+    assert "_needs_review" not in result
 
 
 if __name__ == "__main__":

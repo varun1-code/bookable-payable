@@ -5,10 +5,28 @@ strip the *_raw/_hint scratch fields, and normalise number formatting.
 from __future__ import annotations
 
 import re
+from decimal import Decimal, InvalidOperation
 
 from .master_match import MasterData
 
 _NUM_STRIP = re.compile(r"[^\d.\-]")
+
+
+def _to_decimal(s: str) -> Decimal | None:
+    """Parse a canonical numeric string (as produced by `_clean_num`) into a
+    Decimal. Used for the arithmetic assemble.py itself does (charge
+    reclassification, withholding-sign normalisation) so that internal
+    combining never goes through binary float and picks up rounding drift -
+    erp.py is untouched and still receives plain decimal strings."""
+    try:
+        return Decimal(s)
+    except InvalidOperation:
+        return None
+
+
+def _format_decimal(d: Decimal) -> str:
+    s = format(d, "f")
+    return s.rstrip("0").rstrip(".") if "." in s else s
 
 
 def _clean_num(v) -> str:
@@ -24,10 +42,8 @@ def _clean_num(v) -> str:
         return ""
     if neg and not s2.startswith("-"):
         s2 = "-" + s2
-    try:
-        return format(float(s2), "f").rstrip("0").rstrip(".") if "." in s2 else s2
-    except ValueError:
-        return ""
+    d = _to_decimal(s2)
+    return _format_decimal(d) if d is not None else ""
 
 
 def _clean_str(v) -> str:
@@ -49,7 +65,7 @@ def assemble_payable(raw: dict, master: MasterData) -> dict:
     po_id = master.match_po(po_number) if po_number else ""
 
     taxes = []
-    reclassified_charge_total = 0.0
+    reclassified_charge_total = Decimal("0")
     for t in raw.get("taxes") or []:
         assembled = _assemble_tax(t, master)
         if _is_charge_not_tax(assembled["tax_type"], assembled["tax_name"]):
@@ -58,10 +74,11 @@ def assemble_payable(raw: dict, master: MasterData) -> dict:
             # of just dropping it) keeps the amount grounded in the document while
             # fixing its placement - the same "where it says it" requirement the
             # brief grades, just corrected after the fact rather than re-asked.
-            try:
-                reclassified_charge_total += float(assembled["tax_amount"] or 0)
-            except ValueError:
-                pass
+            # Decimal, not float: this sums across every reclassified tax on the
+            # payable, and float addition can drift a cent on real invoice amounts.
+            amt = _to_decimal(assembled["tax_amount"])
+            if amt is not None:
+                reclassified_charge_total += amt
             continue
         taxes.append(assembled)
 
@@ -71,8 +88,8 @@ def assemble_payable(raw: dict, master: MasterData) -> dict:
 
     extra_charges = _clean_num(raw.get("extra_charges"))
     if reclassified_charge_total:
-        base = float(extra_charges) if extra_charges else 0.0
-        extra_charges = _clean_num(base + reclassified_charge_total)
+        base = _to_decimal(extra_charges) or Decimal("0")
+        extra_charges = _format_decimal(base + reclassified_charge_total)
 
     return {
         "invoice_number": _clean_str(raw.get("invoice_number")),
@@ -135,14 +152,12 @@ def _assemble_tax(t: dict, master: MasterData) -> dict:
     # A withholding tax reduces what's owed by definition - normalise the sign
     # regardless of how the model extracted it, rather than re-litigating this
     # per document. Both the label ("withholding"/"WHT"/...) and the magnitude
-    # are grounded in the document; only the sign is corrected.
+    # are grounded in the document; only the sign is corrected. Decimal (not
+    # float) so a value like "1234.56" round-trips through the sign flip exactly.
     if tax_amount and _WITHHOLDING_RE.search(f"{tax_type} {tax_name}"):
-        try:
-            val = float(tax_amount)
-            if val > 0:
-                tax_amount = _clean_num(-val)
-        except ValueError:
-            pass
+        val = _to_decimal(tax_amount)
+        if val is not None and val > 0:
+            tax_amount = _format_decimal(-val)
     code = master.match_tax(tax_name, tax_rate, tax_type, t.get("country_hint", ""))
     return {
         "tax_type": tax_type,

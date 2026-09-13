@@ -57,9 +57,16 @@ def call_vision_json(
     max_tokens: int = 4000,
     temperature: float = 0.0,
     retries: int = 2,
-) -> dict:
+) -> tuple[dict, bool]:
     """Call the vision model with a system prompt, user text, and N page
-    images; return the parsed JSON object from the model's reply.
+    images; return (parsed_json, repaired) where `repaired` is True iff the
+    reply needed JSON repair to parse (i.e. wasn't clean, directly-parseable
+    output) - callers use this to flag the resulting record for review
+    rather than treat it as indistinguishable from a clean extraction.
+    A reply whose bracket structure is genuinely malformed (not just
+    truncated) raises MalformedJSONError, which this function's own retry
+    loop treats like any other failed attempt - it does not get "repaired"
+    into something that merely happens to parse.
     """
     client = _get_client()
     # NOTE: this endpoint silently drops the "system" role (prompt_tokens doesn't
@@ -130,7 +137,12 @@ def _is_degenerate(text: str, min_repeats: int = 6, ngram_chars: int = 40) -> bo
     return tail.count(chunk) >= min_repeats
 
 
-def _extract_json(text: str) -> dict:
+def _extract_json(text: str) -> tuple[dict, bool]:
+    """Returns (parsed_object, repaired) - `repaired` is True whenever the raw
+    text needed `_repair_json` to become valid JSON, i.e. it was not a clean,
+    directly-parseable reply. A genuinely malformed bracket structure (not
+    just a truncated/missing close) raises MalformedJSONError instead of
+    being silently patched - see `_unclosed_bracket_stack`."""
     text = text.strip()
     if text.startswith("```"):
         text = text.strip("`")
@@ -145,10 +157,10 @@ def _extract_json(text: str) -> dict:
     try:
         # strict=False: tolerate raw control characters (literal newlines) inside
         # strings, which this model sometimes emits in multi-line addresses.
-        return json.loads(candidate, strict=False)
+        return json.loads(candidate, strict=False), False
     except json.JSONDecodeError:
         repaired = _repair_json(candidate)
-        return json.loads(repaired, strict=False)
+        return json.loads(repaired, strict=False), True
 
 
 def _find_matching_brace(text: str, start: int) -> int | None:
@@ -180,12 +192,26 @@ def _find_matching_brace(text: str, start: int) -> int | None:
 
 
 _CLOSERS = {"{": "}", "[": "]"}
+_OPENER_FOR_CLOSER = {"}": "{", "]": "["}
+
+
+class MalformedJSONError(ValueError):
+    """The bracket structure itself is inconsistent - e.g. a ']' appears
+    where the innermost open bracket is a '{' (as in '{"a": ]'). This is
+    NOT a truncation (nothing is simply missing at the end); padding closers
+    on can't fix it, and pretending it's fixable would mean returning a
+    record whose shape the model never actually produced. Callers should
+    treat this exactly like any other failed attempt and retry the model."""
 
 
 def _unclosed_bracket_stack(s: str) -> list[str]:
     """Walk `s` tracking which `{`/`[` are still open, in the order they were
     opened (so the caller can close them LIFO), skipping over string content
-    so braces/brackets inside description text don't confuse it."""
+    so braces/brackets inside description text don't confuse it. Raises
+    MalformedJSONError if a closer doesn't match the most recently opened
+    bracket (or appears with nothing open at all) - that's a structural
+    inconsistency, not a simple truncation, and popping the stack anyway
+    would silently accept a shape the model never produced."""
     stack: list[str] = []
     in_string = False
     escape = False
@@ -202,7 +228,12 @@ def _unclosed_bracket_stack(s: str) -> list[str]:
             in_string = True
         elif c in "{[":
             stack.append(c)
-        elif c in "}]" and stack:
+        elif c in "}]":
+            if not stack or stack[-1] != _OPENER_FOR_CLOSER[c]:
+                raise MalformedJSONError(
+                    f"closer {c!r} does not match innermost open bracket "
+                    f"{(stack[-1] if stack else None)!r}"
+                )
             stack.pop()
     return stack
 

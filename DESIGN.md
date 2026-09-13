@@ -183,3 +183,52 @@ been exercised by hand, one document at a time, rather than tested on their own:
 
 None of this cost any API budget; it's the kind of pass that's easy to skip once a number looks good
 enough, which is exactly why it seemed worth doing before calling this finished.
+
+### A second hardening pass, after external review
+
+A second review of this repository (after commit `6b45db5`) raised five further code-level risks -
+worth recording here because two of them describe failure shapes that had already happened silently
+during this project, not hypothetical ones:
+
+- **A retry could regress an already-good payable.** The retry loop replaced a file's entire payables
+  list with the retry's response, even though the retry was prompted about ONE mismatched payable -
+  so a multi-payable file's retry could, in principle, silently drop an already-footing payable or
+  reclassify it as a decline while fixing the one it was actually asked about. `run.py::_reconcile_retry`
+  now matches payables between attempts by invoice number (falling back to position when blank or
+  duplicated) and keeps the pre-retry version of anything that already footed and would otherwise be
+  lost or broken; it only ever accepts the retry's version of a payable that either wasn't valid before
+  or is still valid after. Covered by mocked `process_file` tests in `tests/test_pipeline.py` that
+  simulate a retry silently dropping, and separately reclassifying, a valid payable.
+- **Malformed (not just truncated) bracket nesting was being silently patched instead of rejected.**
+  `_unclosed_bracket_stack` popped the stack on ANY closer, even one that didn't match the innermost
+  open bracket (e.g. `{"a": ]` - a `]` where a `{` is open). That's a structural inconsistency, not a
+  truncation, and treating it as one could produce a record shape the model never actually intended.
+  It now raises `MalformedJSONError` on a mismatched or unmatched closer, which propagates up to
+  `call_vision_json`'s existing retry loop - the reply is rejected and the model is asked again, the
+  same as any other failed attempt, rather than being coerced into something that merely parses.
+- **A JSON-repaired response looked identical to a clean one.** Repair fixes the bracket structure,
+  but a response that needed repair could still be missing a line item or a trailing field that got
+  cut off before the brackets did - and nothing distinguished that record from a normal extraction.
+  `call_vision_json` now returns `(json, repaired: bool)`; `run.py` carries that through the retry
+  loop and, if any attempt needed repair, adds `"_needs_review": "json_repaired"` to the file's output
+  (outside the three keys `AUTODRAFT_SCHEMA.md` defines, so it can't be mistaken for a graded field).
+  None of the 42 files in this submission carry it.
+- **`assemble.py` combined amounts with float.** Summing several reclassified charges, or flipping a
+  withholding tax's sign, went through binary float (`0.10 + 0.20 + 0.30 == 0.6000000000000001`),
+  which can drift a payable's total by a fraction of a cent purely from how the internal arithmetic is
+  done - `erp.py` itself is untouched and still receives plain decimal strings, but the combining
+  inside `assemble.py` now goes through `Decimal`. Covered by a test that reproduces the exact float
+  drift case and asserts the Decimal path doesn't have it.
+- **A dedicated offline regression command.** `check_output.py` re-verifies every `output/*.json`
+  payable against `erp.py` and diffs the result against a small, explicit table of already-understood
+  exceptions (by the *same* gap, not just "still mismatched") - anything else is reported as a
+  REGRESSION or CHANGED, and an empty file (no payables, no declined - never a valid outcome) is
+  flagged too. This is a direct response to something that happened twice during development: a
+  stray, uncommitted batch re-run (from an earlier, less careful pass) silently overwrote `DU-02`,
+  `DU-03`, and `DU-05` with regressed content - caught once by manually diffing against `erp.py`
+  before committing, and caught a second time, along with a newly-affected `DU-06`, by this exact
+  script the first time it was run. `check_output.py` is what turns "I happened to notice" into
+  something that can't be skipped.
+
+All five changes are code/tooling hardening; none required any API spend, and the payable pass rate
+is unaffected (still 30/34, re-verified with `check_output.py` after every change).

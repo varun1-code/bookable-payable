@@ -56,8 +56,10 @@ def process_file(pdf_path: Path, master: MasterData, usage: UsageTotals) -> dict
         images = images[: config.MAX_PAGES_PER_CALL]
 
     user_text = USER_PROMPT_TEMPLATE.format(filename=pdf_path.name, page_count=len(images))
-    raw = call_vision_json(SYSTEM_PROMPT, user_text, images, usage, pdf_path.name, max_tokens=8000)
-    assembled_payables = [assemble_payable(p, master) for p in raw.get("payables") or []]
+    raw, repaired = call_vision_json(SYSTEM_PROMPT, user_text, images, usage, pdf_path.name, max_tokens=8000)
+    raw_payables = raw.get("payables") or []
+    assembled_payables = [assemble_payable(p, master) for p in raw_payables]
+    any_repaired = repaired
 
     # Bounded, targeted retries: each attempt gets the specific numeric gap fed back and can
     # fix a different root cause than the previous attempt (e.g. a tax-sign fix on attempt 1,
@@ -68,7 +70,7 @@ def process_file(pdf_path: Path, master: MasterData, usage: UsageTotals) -> dict
         if mismatch is None:
             break
         idx, booked, stated = mismatch
-        payable = raw["payables"][idx]
+        payable = raw_payables[idx]
         feedback = RETRY_FEEDBACK_TEMPLATE.format(
             idx=idx,
             invno=payable.get("invoice_number", ""),
@@ -79,21 +81,35 @@ def process_file(pdf_path: Path, master: MasterData, usage: UsageTotals) -> dict
         )
         retry_text = user_text + "\n\n" + feedback
         try:
-            raw_retry = call_vision_json(
+            raw_retry, retry_repaired = call_vision_json(
                 SYSTEM_PROMPT, retry_text, images, usage,
                 f"{pdf_path.name} (retry {attempt})", max_tokens=8000,
             )
-            assembled_payables = [assemble_payable(p, master) for p in raw_retry.get("payables") or []]
-            raw = raw_retry
         except Exception as e:  # noqa: BLE001
             print(f"  [warn] retry {attempt} call failed, keeping previous attempt: {e}")
             break
+
+        new_raw_payables = raw_retry.get("payables") or []
+        new_assembled = [assemble_payable(p, master) for p in new_raw_payables]
+        raw_payables, assembled_payables, n_regressed = _reconcile_retry(
+            raw_payables, assembled_payables, new_raw_payables, new_assembled
+        )
+        if n_regressed:
+            print(
+                f"  [warn] retry {attempt} would have regressed {n_regressed} previously-valid "
+                f"payable(s); kept the pre-retry version of those, took the rest from the retry"
+            )
+        raw = {"payables": raw_payables, "declined": raw_retry.get("declined")}
+        any_repaired = any_repaired or retry_repaired
 
     declined = []
     for d in raw.get("declined") or []:
         declined.append({"doc_type": str(d.get("doc_type", "")), "reason": str(d.get("reason", ""))})
 
-    return {"file": pdf_path.name, "payables": assembled_payables, "declined": declined}
+    result = {"file": pdf_path.name, "payables": assembled_payables, "declined": declined}
+    if any_repaired:
+        result["_needs_review"] = "json_repaired"
+    return result
 
 
 def _first_mismatch(payables: list[dict]):
@@ -102,6 +118,77 @@ def _first_mismatch(payables: list[dict]):
         if not ok:
             return (i, booked, stated)
     return None
+
+
+def _payable_keys(raw_payables: list[dict]) -> list[str]:
+    """A stable identity per payable within one attempt, so the same payable
+    can be matched across two attempts. Prefers invoice_number; falls back to
+    a positional key when it's blank or (rarely) duplicated within the same
+    attempt, so two different payables never collide on the same key."""
+    counts: dict[str, int] = {}
+    for rp in raw_payables:
+        invno = str(rp.get("invoice_number") or "").strip()
+        counts[invno] = counts.get(invno, 0) + 1
+    keys = []
+    for i, rp in enumerate(raw_payables):
+        invno = str(rp.get("invoice_number") or "").strip()
+        keys.append(invno if invno and counts[invno] == 1 else f"__idx{i}__")
+    return keys
+
+
+def _reconcile_retry(
+    prev_raw: list[dict], prev_assembled: list[dict], new_raw: list[dict], new_assembled: list[dict]
+) -> tuple[list[dict], list[dict], int]:
+    """Merge a retry's payables with the previous attempt's so the retry can
+    only ever IMPROVE things: a payable that already footed against erp.py
+    cannot be silently dropped, turned into a decline, or broken by a retry
+    that was aimed at fixing a *different* payable in the same file. Returns
+    (merged_raw, merged_assembled, n_regressed).
+    """
+    prev_keys = _payable_keys(prev_raw)
+    new_keys = _payable_keys(new_raw)
+    prev_ok = [verify.check(p)[0] for p in prev_assembled]
+    new_ok = [verify.check(p)[0] for p in new_assembled]
+
+    new_by_key = {k: i for i, k in enumerate(new_keys)}
+
+    merged_raw: list[dict] = []
+    merged_assembled: list[dict] = []
+    n_regressed = 0
+
+    for i, key in enumerate(prev_keys):
+        j = new_by_key.get(key)
+        if prev_ok[i]:
+            # Already verified before this retry - never allowed to get worse.
+            if j is not None and new_ok[j]:
+                merged_raw.append(new_raw[j])
+                merged_assembled.append(new_assembled[j])
+            else:
+                # Missing from the retry entirely, or now fails to foot: the
+                # retry regressed a previously-good payable. Keep the old one.
+                n_regressed += 1
+                merged_raw.append(prev_raw[i])
+                merged_assembled.append(prev_assembled[i])
+        else:
+            # Wasn't verified before - take the retry's attempt at it if there
+            # is one (that's the whole point of retrying), else keep the old
+            # (still-broken) version rather than dropping it.
+            if j is not None:
+                merged_raw.append(new_raw[j])
+                merged_assembled.append(new_assembled[j])
+            else:
+                merged_raw.append(prev_raw[i])
+                merged_assembled.append(prev_assembled[i])
+
+    # Carry over any payable the retry introduced that wasn't in the previous
+    # attempt at all (e.g. it split out a second document it missed before).
+    prev_key_set = set(prev_keys)
+    for j, key in enumerate(new_keys):
+        if key not in prev_key_set:
+            merged_raw.append(new_raw[j])
+            merged_assembled.append(new_assembled[j])
+
+    return merged_raw, merged_assembled, n_regressed
 
 
 def main():
